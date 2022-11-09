@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -19,8 +20,21 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'dj_rest_auth.registration',
+
     'rest_framework',
+    'blog',
+    'api',
+    'rest_framework.authtoken',
+    'dj_rest_auth',
 ]
+
+SITE_ID=1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -97,3 +111,26 @@ MEDIA_ROOT=os.path.join(BASE_DIR,"media")
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        # 'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+        'api.permissions.IsStaffOrReadOnly'
+    ],
+        'DEFAULT_AUTHENTICATION_CLASSES': [
+        # 'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ]
+}
+
+EMAIL_BACKEND ="django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST ="smtp.gmail.com"
+EMAIL_USE_TLS =True
+EMAIL_PORT =587
+EMAIL_HOST_USER ="workneedsbedone@gmail.com"
+EMAIL_HOST_PASSWORD ="rcxnbusvihuckwjp"
