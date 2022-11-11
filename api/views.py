@@ -1,13 +1,89 @@
+from urllib import request
 from django.shortcuts import render,redirect,get_object_or_404
-from .serializers import ArticleSerializer,UserSerializer
+from .serializers import ArticleSerializer, AuthorSerializer,UserSerializer
 from blog.models import Article
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView,ListCreateAPIView,RetrieveAPIView,RetrieveUpdateDestroyAPIView
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAdminUser,IsAuthenticated,IsAuthenticatedOrReadOnly
 from .permissions import IsSuperUser,IsStaffOrReadOnly,IsAuthorOrReadOnly,IsSuperUserOrStaffReadOnly
 from rest_framework.views import APIView
 from rest_framework import status
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.generics import RetrieveAPIView
+
+
+
+
+
+class UserViewForHyperLink(RetrieveAPIView):
+
+    serializer_class=AuthorSerializer
+    def get_queryset(self):
+        return get_user_model().objects.all()    
+
+
+
+
+
+
+
+
+
+
+
+
+class AticlesWithModeViewSet(ModelViewSet):
+
+    queryset=Article.objects.all()
+    serializer_class=ArticleSerializer
+    filterset_fields=["slug","author__username","status"]
+    search_fields=["title","content"]
+    # ordering_fields=["-id"]
+    ordering=["-id"]
+
+
+
+    # def get_queryset(self):
+
+    #     query=Article.objects.all()
+    #     slug=self.request.query_params.get("slug")
+    #     if slug is not None:
+    #         query=Article.objects.filter(
+    #             slug__icontains=slug
+    #         )
+    #     return query
+    
+        
+    
+
+    def get_permissions(self):
+
+        if self.action in ["list","create"]:
+
+            permission_classes=[IsStaffOrReadOnly]
+        else:
+            permission_classes=[IsAuthorOrReadOnly,IsStaffOrReadOnly]
+
+        return [permission() for permission in permission_classes ]
+
+        
+        
+
+
+
+
+class UserWithModelViewSet(ModelViewSet):
+
+    queryset=get_user_model().objects.all()
+    serializer_class=UserSerializer
+    permission_classes=[IsSuperUserOrStaffReadOnly]
+
+
+
+
+    
+
 
 
 
@@ -51,7 +127,7 @@ class ArticleDetail(RetrieveUpdateDestroyAPIView):
 
 class UserList(ListCreateAPIView):
 
-    queryset=User.objects.all()
+    queryset=get_user_model().objects.all()
     serializer_class=UserSerializer
     permission_classes=[IsSuperUserOrStaffReadOnly]
 
@@ -61,7 +137,7 @@ class UserList(ListCreateAPIView):
 class UsereDetail(RetrieveUpdateDestroyAPIView):
 
     serializer_class=UserSerializer
-    queryset=User.objects.all()
+    queryset=get_user_model().objects.all()
     permission_classes=[IsSuperUserOrStaffReadOnly]
 
 
